@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0f3d3e">
+<title>BRRR Deal Calculator</title>
+<style>
+:root{
+  --bg:#f4f5f2;--card:#fff;--ink:#16201f;--muted:#5f6b69;--line:#e1e4de;
+  --brand:#0f3d3e;--brand2:#1d6b5f;--good:#16794a;--bad:#b42318;--warn:#b26b00;--chip:#eef1ec;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0e1413;--card:#172120;--ink:#e8eeec;--muted:#93a29f;--line:#25312f;
+  --brand:#0b2b2c;--brand2:#3fb39b;--good:#4cc38a;--bad:#ff7a6b;--warn:#f0b44c;--chip:#1e2a28;
+}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{background:var(--brand);color:#fff;padding:14px 16px 12px}
+header h1{margin:0;font-size:18px;letter-spacing:.2px}
+header input{margin-top:8px;width:100%;border:0;border-radius:8px;padding:9px 10px;font-size:15px;background:rgba(255,255,255,.12);color:#fff}
+header input::placeholder{color:rgba(255,255,255,.6)}
+.sticky{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr 1fr;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.kpi{padding:9px 8px;text-align:center;border-right:1px solid var(--line)}
+.kpi:last-child{border-right:0}
+.kpi .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.kpi .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+main{max-width:720px;margin:0 auto;padding:12px 12px 90px}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:0 0 10px;overflow:hidden}
+summary{list-style:none;cursor:pointer;padding:13px 14px;font-weight:650;display:flex;justify-content:space-between;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary .s{font-weight:500;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+summary:after{content:"›";transform:rotate(90deg);transition:.15s;color:var(--muted);margin-left:8px;font-size:18px}
+details:not([open]) summary:after{transform:none}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;padding:0 14px 14px}
+.grid>*{min-width:0}
+.f label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.f.full label{white-space:normal}
+.f{display:flex;flex-direction:column;gap:4px}
+.f.full{grid-column:1/-1}
+.f label{font-size:12.5px;color:var(--muted)}
+.inp{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;background:var(--bg);padding:0 10px}
+.inp:focus-within{border-color:var(--brand2)}
+.inp span{color:var(--muted);font-size:14px}
+.inp input,.inp select{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:16px;padding:10px 4px;font-variant-numeric:tabular-nums;outline:none}
+.inp select{padding-left:0}
+.hint{font-size:12px;color:var(--muted);grid-column:1/-1;margin-top:-2px}
+.toggle{grid-column:1/-1;display:flex;gap:10px;align-items:center;font-size:14px}
+.toggle input{width:20px;height:20px;accent-color:var(--brand2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:0 0 10px}
+.card h2{margin:0 0 10px;font-size:15px}
+.rows .r{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);font-variant-numeric:tabular-nums}
+.rows .r:last-child{border-bottom:0}
+.rows .r.t{font-weight:700;border-top:1px solid var(--ink);border-bottom:0;margin-top:4px;padding-top:8px}
+.rows .r span:first-child{color:var(--muted)}
+.rows .r.t span:first-child{color:var(--ink)}
+.big{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:10px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.tile .l{font-size:12px;color:var(--muted)}
+.tile .v{font-size:22px;font-weight:750;font-variant-numeric:tabular-nums;margin-top:3px}
+.tile .n{font-size:12px;color:var(--muted);margin-top:2px}
+.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.flag{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.flag:last-child{border-bottom:0}
+.dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex:none}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
+button.p{background:var(--brand2);border-color:var(--brand2);color:#fff}
+button:active{transform:translateY(1px)}
+.saved .it{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.saved .it:last-child{border-bottom:0}
+.saved .it b{display:block;font-size:14px}
+.saved .it small{color:var(--muted);font-variant-numeric:tabular-nums}
+.saved .it .a{display:flex;gap:6px}
+.saved .it button{padding:6px 10px;font-size:13px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:20px;font-size:14px;opacity:0;transition:.2s;pointer-events:none}
+.toast.on{opacity:1}
+textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);padding:10px;font:13px/1.4 ui-monospace,Menlo,monospace}
+.muted{color:var(--muted);font-size:12.5px}
+.inp.check{border-color:var(--warn);box-shadow:0 0 0 2px color-mix(in srgb,var(--warn) 25%,transparent)}
+#prefillLinks a{font-weight:600;color:var(--brand2);text-decoration:none;border:1px solid var(--line);padding:8px 12px;border-radius:9px;background:var(--card)}
+@media (min-width:640px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.big{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header>
+  <h1>BRRR Deal Calculator</h1>
+  <input id="dealName" placeholder="Deal name, e.g. 2 bed flat, Fisher St TQ4" autocomplete="off">
+</header>
+
+<div class="sticky">
+  <div class="kpi"><div class="l">Money left in</div><div class="v" id="k_left">–</div></div>
+  <div class="kpi"><div class="l">Cashflow / mo</div><div class="v" id="k_cf">–</div></div>
+  <div class="kpi"><div class="l">ROI</div><div class="v" id="k_roi">–</div></div>
+</div>
+
+<main>
+  <div id="prefillNote" class="card" style="display:none;border-color:var(--warn)">
+    <b>Filled in from the listing.</b> The price, stamp duty and service charge are set for this property.
+    <b>End value (GDV) and rent are rough placeholders</b>, so enter your own figures, highlighted below.
+    <div class="btns" style="margin-top:8px" id="prefillLinks"></div>
+  </div>
+  <details open>
+    <summary>1 · Purchase <span class="s" id="s_buy"></span></summary>
+    <div class="grid">
+      <div class="f"><label>Purchase price</label><div class="inp"><span>£</span><input data-k="price" inputmode="decimal"></div></div>
+      <div class="f"><label>Buyer type</label><div class="inp"><select data-k="sdltMode">
+        <option value="add">Additional (+5%)</option>
+        <option value="std">Standard rates</option>
+        <option value="manual">Enter manually</option></select></div></div>
+      <div class="f"><label>Stamp duty</label><div class="inp"><span>£</span><input data-k="sdltManual" inputmode="decimal"></div></div>
+      <div class="f"><label>Legal fees</label><div class="inp"><span>£</span><input data-k="legal" inputmode="decimal"></div></div>
+      <div class="f"><label>Survey</label><div class="inp"><span>£</span><input data-k="survey" inputmode="decimal"></div></div>
+      <div class="f"><label>Sourcing / auction fee</label><div class="inp"><span>£</span><input data-k="sourcing" inputmode="decimal"></div></div>
+      <div class="hint" id="h_sdlt"></div>
+    </div>
+  </details>
+
+  <details open>
+    <summary>2 · Refurb &amp; holding <span class="s" id="s_ref"></span></summary>
+    <div class="grid">
+      <div class="f"><label>Refurb cost</label><div class="inp"><span>£</span><input data-k="refurb" inputmode="decimal"></div></div>
+      <div class="f"><label>Contingency</label><div class="inp"><input data-k="contPct" inputmode="decimal"><span>%</span></div></div>
+      <div class="f"><label>Months until refinance</label><div class="inp"><input data-k="months" inputmode="decimal"><span>mo</span></div></div>
+      <div class="f full"><label>Holding costs / month (council tax, utilities, insurance while empty)</label><div class="inp"><span>£</span><input data-k="holdPm" inputmode="decimal"></div></div>
+      <label class="toggle"><input type="checkbox" data-k="useBridge"> Bridging finance for the purchase</label>
+      <div class="f bridge"><label>Bridge loan (% of price)</label><div class="inp"><input data-k="bridgePct" inputmode="decimal"><span>%</span></div></div>
+      <div class="f bridge"><label>Interest per month</label><div class="inp"><input data-k="bridgeRate" inputmode="decimal"><span>%</span></div></div>
+      <div class="f bridge"><label>Arrangement fee</label><div class="inp"><input data-k="bridgeArr" inputmode="decimal"><span>%</span></div></div>
+      <div class="f bridge"><label>Exit fee</label><div class="inp"><input data-k="bridgeExit" inputmode="decimal"><span>%</span></div></div>
+      <div class="f bridge"><label>Bridge legals / valuation</label><div class="inp"><span>£</span><input data-k="bridgeLegal" inputmode="decimal"></div></div>
+    </div>
+  </details>
+
+  <details open>
+    <summary>3 · Refinance <span class="s" id="s_refi"></span></summary>
+    <div class="grid">
+      <div class="f"><label>End value after refurb (GDV)</label><div class="inp"><span>£</span><input data-k="gdv" inputmode="decimal"></div></div>
+      <div class="f"><label>Loan to value</label><div class="inp"><input data-k="ltv" inputmode="decimal"><span>%</span></div></div>
+      <div class="f"><label>Mortgage rate</label><div class="inp"><input data-k="rate" inputmode="decimal"><span>%</span></div></div>
+      <div class="f"><label>Repayment type</label><div class="inp"><select data-k="repay">
+        <option value="io">Interest only</option><option value="rep">Capital repayment</option></select></div></div>
+      <div class="f"><label>Term</label><div class="inp"><input data-k="term" inputmode="decimal"><span>yrs</span></div></div>
+      <div class="f"><label>Lender arrangement fee</label><div class="inp"><span>£</span><input data-k="lenderFee" inputmode="decimal"></div></div>
+      <label class="toggle"><input type="checkbox" data-k="feeAdded"> Add lender fee to the loan</label>
+      <div class="f"><label>Broker fee</label><div class="inp"><span>£</span><input data-k="broker" inputmode="decimal"></div></div>
+      <div class="f"><label>Valuation + refi legals</label><div class="inp"><span>£</span><input data-k="refiLegal" inputmode="decimal"></div></div>
+      <div class="f"><label>Lender ICR</label><div class="inp"><input data-k="icr" inputmode="decimal"><span>%</span></div></div>
+      <div class="f"><label>ICR stress rate</label><div class="inp"><input data-k="stress" inputmode="decimal"><span>%</span></div></div>
+      <label class="toggle"><input type="checkbox" data-k="capIcr"> Cap the loan at what the rent supports (ICR)</label>
+      <div class="hint">Common lender tests: limited company 125% at 5.5%; higher-rate taxpayer in own name 145%. Check with your broker.</div>
+    </div>
+  </details>
+
+  <details open>
+    <summary>4 · Rent &amp; running costs <span class="s" id="s_rent"></span></summary>
+    <div class="grid">
+      <div class="f"><label>Monthly rent</label><div class="inp"><span>£</span><input data-k="rent" inputmode="decimal"></div></div>
+      <div class="f"><label>Letting / management</label><div class="inp"><input data-k="mgmt" inputmode="decimal"><span>%</span></div></div>
+      <div class="f"><label>Voids</label><div class="inp"><input data-k="voids" inputmode="decimal"><span>%</span></div></div>
+      <div class="f"><label>Maintenance</label><div class="inp"><input data-k="maint" inputmode="decimal"><span>%</span></div></div>
+      <div class="f"><label>Landlord insurance / mo</label><div class="inp"><span>£</span><input data-k="ins" inputmode="decimal"></div></div>
+      <div class="f"><label>Service charge + ground rent / mo</label><div class="inp"><span>£</span><input data-k="service" inputmode="decimal"></div></div>
+      <div class="f"><label>Other / mo (certs, software)</label><div class="inp"><span>£</span><input data-k="other" inputmode="decimal"></div></div>
+    </div>
+  </details>
+
+  <div class="big">
+    <div class="tile"><div class="l">Total cash needed</div><div class="v" id="t_cashin">–</div><div class="n">peak cash before refinance</div></div>
+    <div class="tile"><div class="l">Cash pulled out</div><div class="v" id="t_out">–</div><div class="n" id="t_outn"></div></div>
+    <div class="tile"><div class="l">Money left in</div><div class="v" id="t_left">–</div><div class="n" id="t_leftn"></div></div>
+    <div class="tile"><div class="l">Equity created</div><div class="v" id="t_eq">–</div><div class="n">GDV − mortgage</div></div>
+  </div>
+
+  <div class="card"><h2>Deal check</h2><div id="flags"></div></div>
+
+  <div class="card"><h2>Maximum offer</h2>
+    <div class="grid" style="padding:0">
+      <div class="f"><label>Target money left in</label><div class="inp"><span>£</span><input data-k="targetLeft" inputmode="decimal"></div></div>
+      <div class="f"><label>Highest price you can pay</label><div class="inp" style="background:transparent;border-style:dashed"><b id="maxOffer" style="padding:10px 4px;font-size:16px">–</b></div></div>
+      <div class="hint">Assumes everything else stays the same. Stamp duty, bridging costs and fees are recalculated at each price.</div>
+    </div>
+  </div>
+
+  <div class="card"><h2>Breakdown</h2>
+    <div class="rows" id="b_costs"></div>
+    <div style="height:12px"></div>
+    <div class="rows" id="b_refi"></div>
+    <div style="height:12px"></div>
+    <div class="rows" id="b_cf"></div>
+  </div>
+
+  <div class="card">
+    <h2>Saved deals</h2>
+    <div class="btns" style="margin-bottom:10px">
+      <button class="p" id="save">Save deal</button>
+      <button id="new">New deal</button>
+      <button id="copy">Copy summary</button>
+      <button id="io">Export / import</button>
+    </div>
+    <div class="saved" id="saved"></div>
+    <div id="ioBox" style="display:none;margin-top:10px">
+      <p class="muted">Saved deals live in this browser only. To move them to another phone or computer, copy this text, then paste it into the box on the other device and tap Import.</p>
+      <textarea id="ioText"></textarea>
+      <div class="btns" style="margin-top:8px"><button id="ioCopy">Copy</button><button class="p" id="ioImport">Import</button></div>
+    </div>
+  </div>
+  <p class="muted">These figures are estimates. Stamp duty uses England &amp; NI rates from 1 April 2025, plus the 5% surcharge on additional property (not applied under £40k). Check lending criteria and tax with your broker and accountant. Cashflow is before income tax.</p>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULTS = {
+  price:95000, sdltMode:"add", sdltManual:0, legal:1500, survey:500, sourcing:0,
+  refurb:12000, contPct:10, months:5, holdPm:150,
+  useBridge:false, bridgePct:75, bridgeRate:0.85, bridgeArr:2, bridgeExit:1, bridgeLegal:1500,
+  gdv:125000, ltv:75, rate:5.5, repay:"io", term:25, lenderFee:1995, feeAdded:true, broker:500, refiLegal:900,
+  icr:125, stress:5.5, capIcr:true,
+  rent:775, mgmt:12, voids:4, maint:5, ins:20, service:100, other:10,
+  targetLeft:0
+};
+let S = {...DEFAULTS};
+const $ = id => document.getElementById(id);
+const fmt = (n, d=0) => (n<0?"−":"") + "£" + Math.abs(n).toLocaleString("en-GB",{maximumFractionDigits:d,minimumFractionDigits:d});
+const pct = n => isFinite(n) ? n.toFixed(1)+"%" : "∞";
+
+function sdlt(price, mode){
+  const bands=[[125000,0],[250000,.02],[925000,.05],[1500000,.10],[Infinity,.12]];
+  let tax=0, prev=0;
+  const sur = (mode==="add" && price>=40000) ? .05 : 0;
+  for(const [top,r] of bands){ if(price>prev){ tax += (Math.min(price,top)-prev)*(r+sur); } prev=top; }
+  return Math.round(tax);
+}
+
+function calc(s, priceOverride){
+  const price = priceOverride ?? +s.price;
+  const stamp = s.sdltMode==="manual" ? +s.sdltManual : sdlt(price, s.sdltMode);
+  const refurb = +s.refurb * (1 + s.contPct/100);
+  const holding = s.holdPm * s.months;
+  let bridgeLoan=0, bridgeInt=0, bridgeFees=0;
+  if(s.useBridge){
+    bridgeLoan = price * s.bridgePct/100;
+    bridgeInt = bridgeLoan * s.bridgeRate/100 * s.months;
+    bridgeFees = bridgeLoan * (s.bridgeArr + s.bridgeExit)/100 + +s.bridgeLegal;
+  }
+  const acq = price + stamp + +s.legal + +s.survey + +s.sourcing;
+  const totalCost = acq + refurb + holding + bridgeInt + bridgeFees;
+  const cashIn = totalCost - bridgeLoan;
+
+  // refinance
+  const annualRent = s.rent*12;
+  const ltvLoan = s.gdv * s.ltv/100;
+  const icrLoan = (s.icr>0 && s.stress>0) ? annualRent / (s.icr/100 * s.stress/100) : Infinity;
+  let mortgage = s.capIcr ? Math.min(ltvLoan, icrLoan) : ltvLoan;
+  const feeInLoan = s.feeAdded ? +s.lenderFee : 0;
+  const netAdvance = mortgage;               // cash the lender releases
+  const loanBalance = mortgage + feeInLoan;  // what you owe
+  const refiCosts = +s.broker + +s.refiLegal + (s.feeAdded ? 0 : +s.lenderFee);
+  const cashOut = netAdvance - bridgeLoan - refiCosts;   // cash back in your pocket
+  const left = cashIn - cashOut;
+
+  // cashflow
+  const r = s.rate/100/12, n = s.term*12;
+  const mPay = s.repay==="io" ? loanBalance*r : (r ? loanBalance*r/(1-Math.pow(1+r,-n)) : loanBalance/n);
+  const pctCosts = s.rent * (+s.mgmt + +s.voids + +s.maint)/100;
+  const fixed = +s.ins + +s.service + +s.other;
+  const cf = s.rent - mPay - pctCosts - fixed;
+  const roi = left > 0 ? cf*12/left*100 : Infinity;
+  return {price, stamp, refurb, holding, bridgeLoan, bridgeInt, bridgeFees, acq, totalCost, cashIn,
+    ltvLoan, icrLoan, mortgage, loanBalance, feeInLoan, refiCosts, cashOut, left, mPay, pctCosts, fixed, cf, roi,
+    equity: s.gdv - loanBalance, grossYieldPrice: annualRent/price*100, grossYieldCost: annualRent/totalCost*100,
+    uplift: s.gdv - totalCost, icrLimited: s.capIcr && icrLoan < ltvLoan};
+}
+
+function maxOffer(s){
+  const target = +s.targetLeft;
+  if(calc(s, 1000).left > target) return null;
+  let lo=1000, hi=Math.max(+s.gdv*2, 50000);
+  for(let i=0;i<60;i++){ const mid=(lo+hi)/2; if(calc(s,mid).left<=target) lo=mid; else hi=mid; }
+  return Math.floor(lo/500)*500;
+}
+
+function rows(el, list){
+  el.innerHTML = list.filter(Boolean).map(([a,b,t]) => `<div class="r${t?' t':''}"><span>${a}</span><span>${b}</span></div>`).join("");
+}
+function cls(el, v, goodIf){ el.classList.remove("good","bad","warn"); el.classList.add(goodIf(v) ? "good" : "bad"); }
+
+function render(){
+  const c = calc(S);
+  $("k_left").textContent = c.left<=0 ? fmt(0) : fmt(c.left);
+  $("k_left").className = "v " + (c.left<=0 ? "good" : c.left < c.cashIn*0.25 ? "warn" : "bad");
+  $("k_cf").textContent = fmt(c.cf); $("k_cf").className = "v " + (c.cf>100?"good":c.cf>0?"warn":"bad");
+  $("k_roi").textContent = c.left<=0 ? "∞" : pct(c.roi); cls($("k_roi"), c.roi, v=>v>=10);
+
+  $("s_buy").textContent = fmt(c.acq);
+  $("s_ref").textContent = fmt(c.refurb + c.holding + c.bridgeInt + c.bridgeFees);
+  $("s_refi").textContent = fmt(c.mortgage) + " loan";
+  $("s_rent").textContent = fmt(+S.rent) + "/mo";
+  $("h_sdlt").textContent = S.sdltMode==="manual" ? "" : `Stamp duty calculated: ${fmt(c.stamp)}`;
+  document.querySelectorAll('[data-k="sdltManual"]').forEach(i=>{ i.disabled = S.sdltMode!=="manual"; if(S.sdltMode!=="manual") i.value = c.stamp.toLocaleString("en-GB"); });
+  document.querySelectorAll(".bridge").forEach(e=>e.style.display = S.useBridge ? "" : "none");
+
+  $("t_cashin").textContent = fmt(c.cashIn);
+  $("t_out").textContent = fmt(c.cashOut);
+  $("t_outn").textContent = c.cashIn>0 ? `${Math.max(0, Math.min(100, c.cashOut/c.cashIn*100)).toFixed(0)}% of your cash recycled` : "";
+  $("t_left").textContent = c.left<=0 ? fmt(0) : fmt(c.left);
+  $("t_leftn").textContent = c.left<0 ? `You pull out ${fmt(-c.left)} more than you put in` : c.left===0 ? "All cash recycled" : "Stays tied up in the deal";
+  $("t_eq").textContent = fmt(c.equity);
+
+  rows($("b_costs"), [
+    ["Purchase price", fmt(c.price)], ["Stamp duty", fmt(c.stamp)],
+    ["Legal, survey, sourcing", fmt(+S.legal + +S.survey + +S.sourcing)],
+    ["Refurb inc. " + S.contPct + "% contingency", fmt(c.refurb)],
+    ["Holding (" + S.months + " months)", fmt(c.holding)],
+    S.useBridge && ["Bridging interest", fmt(c.bridgeInt)],
+    S.useBridge && ["Bridging fees", fmt(c.bridgeFees)],
+    ["Total project cost", fmt(c.totalCost), 1],
+    S.useBridge && ["Less bridging loan", fmt(-c.bridgeLoan)],
+    ["Your cash in", fmt(c.cashIn), 1],
+  ]);
+  rows($("b_refi"), [
+    ["Max loan at " + S.ltv + "% LTV", fmt(c.ltvLoan)],
+    ["Max loan the rent supports (ICR)", isFinite(c.icrLoan) ? fmt(c.icrLoan) : "–"],
+    ["New mortgage" + (c.icrLimited ? " (capped by rent)" : ""), fmt(c.mortgage), 1],
+    S.useBridge && ["Repay bridge", fmt(-c.bridgeLoan)],
+    ["Refinance costs", fmt(-c.refiCosts)],
+    ["Cash back to you", fmt(c.cashOut), 1],
+    ["Money left in", fmt(c.left), 1],
+  ]);
+  rows($("b_cf"), [
+    ["Rent", fmt(+S.rent)],
+    ["Mortgage (" + (S.repay==="io"?"interest only":"repayment") + ")", fmt(-c.mPay)],
+    ["Management, voids, maintenance", fmt(-c.pctCosts)],
+    ["Insurance, service charge, other", fmt(-c.fixed)],
+    ["Monthly cashflow", fmt(c.cf), 1],
+    ["Annual cashflow", fmt(c.cf*12), 1],
+  ]);
+
+  const F = [];
+  const add = (lvl, txt) => F.push(`<div class="flag"><span class="dot" style="background:var(--${lvl})"></span><span>${txt}</span></div>`);
+  if(c.left <= 0) add("good", "All your cash comes back out at refinance. That's a full BRRR.");
+  else if(c.left < c.cashIn*0.25) add("warn", `${fmt(c.left)} stays in the deal (${(c.left/c.cashIn*100).toFixed(0)}% of your cash).`);
+  else add("bad", `${fmt(c.left)} stays in the deal. That's ${(c.left/c.cashIn*100).toFixed(0)}% of your cash, so this is closer to a buy-to-let than a BRRR.`);
+  if(c.icrLimited) add("warn", `The rent caps your loan at ${fmt(c.icrLoan)}, below ${S.ltv}% LTV (${fmt(c.ltvLoan)}). You need about ${fmt(c.ltvLoan*(S.icr/100)*(S.stress/100)/12)}/mo rent to borrow the full LTV.`);
+  add(c.cf > 100 ? "good" : c.cf > 0 ? "warn" : "bad", `Cashflow ${fmt(c.cf)}/mo after a ${pct(c.pctCosts/S.rent*100)} allowance for management, voids and maintenance.`);
+  add(c.uplift >= 0.25*c.totalCost ? "good" : c.uplift > 0 ? "warn" : "bad", `Value uplift ${fmt(c.uplift)} over total cost (${pct(c.uplift/c.totalCost*100)}). Many BRRR investors aim for 25%+ so a 75% LTV mortgage covers the whole cost.`);
+  add(c.grossYieldPrice >= 8 ? "good" : c.grossYieldPrice >= 6 ? "warn" : "bad", `Gross yield ${pct(c.grossYieldPrice)} on purchase price, ${pct(c.grossYieldCost)} on total cost.`);
+  if(+S.service > 0) add("warn", "Leasehold: check the lease length (lenders usually want 85+ years at refinance), ground rent terms and service charge history.");
+  if(+S.months < 6) add("warn", "Many lenders won't refinance at the new value within 6 months of purchase. Check that a day-one remortgage lender is available.");
+  $("flags").innerHTML = F.join("");
+
+  const mo = maxOffer(S);
+  $("maxOffer").textContent = mo===null ? "Not achievable" : fmt(mo);
+}
+
+// ---- inputs
+function bind(){
+  document.querySelectorAll("[data-k]").forEach(el=>{
+    const k = el.dataset.k;
+    const set = () => {
+      if(el.type==="checkbox") S[k]=el.checked;
+      else if(el.tagName==="SELECT") S[k]=el.value;
+      else { const v=parseFloat(String(el.value).replace(/[£,\s]/g,"")); S[k]=isNaN(v)?0:v; }
+      render(); persistDraft();
+    };
+    el.addEventListener("input", set); el.addEventListener("change", set);
+    if(el.inputMode==="decimal") el.addEventListener("blur", ()=>{ if(el.value!=="" && !el.disabled) el.value = (+S[k]).toLocaleString("en-GB",{maximumFractionDigits:2}); });
+    el.addEventListener("focus", ()=>{ if(el.inputMode==="decimal" && !el.disabled){ el.value = S[k]; el.select(); }});
+  });
+}
+function fill(){
+  document.querySelectorAll("[data-k]").forEach(el=>{
+    const k=el.dataset.k;
+    if(el.type==="checkbox") el.checked=!!S[k];
+    else if(el.tagName==="SELECT") el.value=S[k];
+    else el.value=(+S[k]).toLocaleString("en-GB",{maximumFractionDigits:2});
+  });
+  $("dealName").value = S.name || "";
+}
+
+// ---- storage (this browser only)
+const LS = { get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } },
+             set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } } };
+let deals = LS.get("brrr_deals", []);
+function persistDraft(){ LS.set("brrr_draft", S); }
+function toast(t){ const e=$("toast"); e.textContent=t; e.classList.add("on"); setTimeout(()=>e.classList.remove("on"),1800); }
+
+function renderSaved(){
+  if(!deals.length){ $("saved").innerHTML = '<p class="muted">No saved deals yet. Saved deals are kept in this browser.</p>'; return; }
+  $("saved").innerHTML = deals.map((d,i)=>{ const c=calc(d); return `<div class="it">
+    <div><b>${(d.name||"Untitled deal").replace(/</g,"&lt;")}</b>
+    <small>${fmt(+d.price)} · left in ${fmt(Math.max(0,c.left))} · ${fmt(c.cf)}/mo</small></div>
+    <div class="a"><button data-open="${i}">Open</button><button data-del="${i}">✕</button></div></div>`; }).join("");
+}
+$("saved").addEventListener("click", e=>{
+  const o=e.target.dataset.open, d=e.target.dataset.del;
+  if(o!==undefined){ S={...DEFAULTS,...deals[o]}; fill(); render(); persistDraft(); window.scrollTo({top:0,behavior:"smooth"}); toast("Deal loaded"); }
+  if(d!==undefined){ if(e.target.dataset.sure){ deals.splice(d,1); LS.set("brrr_deals",deals); renderSaved(); toast("Deleted"); }
+                     else { e.target.dataset.sure=1; e.target.textContent="Delete?"; } }
+});
+$("save").onclick = ()=>{
+  S.name = $("dealName").value.trim() || `Deal ${deals.length+1}`;
+  $("dealName").value = S.name;
+  const i = deals.findIndex(d=>d.name===S.name);
+  if(i>=0) deals[i]={...S}; else deals.unshift({...S});
+  toast(LS.set("brrr_deals",deals) ? "Saved" : "Couldn't save: storage is blocked in this browser");
+  renderSaved();
+};
+$("new").onclick = ()=>{ S={...DEFAULTS}; fill(); render(); persistDraft(); toast("New deal"); };
+$("dealName").addEventListener("input", e=>{ S.name=e.target.value; persistDraft(); });
+
+function summary(){
+  const c=calc(S);
+  return [`${S.name||"BRRR deal"}`,
+    `Purchase ${fmt(c.price)} + SDLT ${fmt(c.stamp)} + refurb ${fmt(c.refurb)} → total cost ${fmt(c.totalCost)}`,
+    `GDV ${fmt(+S.gdv)} · mortgage ${fmt(c.mortgage)} @ ${S.rate}%`,
+    `Cash in ${fmt(c.cashIn)} · cash out ${fmt(c.cashOut)} · money left in ${fmt(Math.max(0,c.left))}`,
+    `Rent ${fmt(+S.rent)}/mo · cashflow ${fmt(c.cf)}/mo (${fmt(c.cf*12)}/yr) · ROI ${c.left<=0?"infinite":pct(c.roi)}`,
+    `Equity ${fmt(c.equity)} · gross yield ${pct(c.grossYieldPrice)}`].join("\n");
+}
+async function copyText(t, msg){ try{ await navigator.clipboard.writeText(t); toast(msg); }catch(e){ $("ioBox").style.display="block"; $("ioText").value=t; $("ioText").select(); toast("Select the text and copy it"); } }
+$("copy").onclick = ()=>copyText(summary(), "Summary copied");
+$("io").onclick = ()=>{ const b=$("ioBox"); b.style.display = b.style.display==="none" ? "block" : "none"; $("ioText").value = JSON.stringify(deals); };
+$("ioCopy").onclick = ()=>copyText($("ioText").value, "Copied");
+$("ioImport").onclick = ()=>{
+  try{ const arr=JSON.parse($("ioText").value); if(!Array.isArray(arr)) throw 0;
+       const names=new Set(deals.map(d=>d.name)); arr.forEach(d=>{ if(!names.has(d.name)) deals.push(d); });
+       LS.set("brrr_deals",deals); renderSaved(); toast(`Imported ${arr.length} deal(s)`);
+  }catch(e){ toast("That text isn't a deals export"); }
+};
+
+// A link from the Deal Finder dashboard carries the property's details after #prefill=
+let PRE = null;
+try{ if(location.hash.startsWith("#prefill=")) PRE = JSON.parse(decodeURIComponent(location.hash.slice(9))); }catch(e){ PRE = null; }
+if(PRE){
+  const {listingUrl, fromDashboard, ...vals} = PRE;
+  S = {...DEFAULTS, ...vals};
+  $("prefillNote").style.display = "block";
+  const links = [];
+  if(listingUrl && /^https:\/\//.test(listingUrl)) links.push(`<a href="${listingUrl.replace(/"/g,"&quot;")}" target="_blank" rel="noopener">View listing ↗</a>`);
+  if(fromDashboard) links.push(`<a href="dashboard.html">← Back to listings</a>`);
+  $("prefillLinks").innerHTML = links.join("");
+  ["gdv","rent"].forEach(k => { const el = document.querySelector(`[data-k="${k}"]`); const box = el && el.closest(".inp");
+    if(box){ box.classList.add("check"); el.addEventListener("input", () => box.classList.remove("check"), {once:true}); } });
+}else{
+  S = {...DEFAULTS, ...LS.get("brrr_draft", {})};
+}
+bind(); fill(); render(); renderSaved();
+</script>
+</body>
+</html>
