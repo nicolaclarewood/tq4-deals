@@ -78,6 +78,14 @@ button:active{transform:translateY(1px)}
 .toast.on{opacity:1}
 textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);padding:10px;font:13px/1.4 ui-monospace,Menlo,monospace}
 .muted{color:var(--muted);font-size:12.5px}
+.items{grid-column:1/-1;display:none;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;background:var(--bg);border-radius:10px;padding:12px}
+.items.on{display:grid}
+.items .inp{background:var(--card)}
+@media (min-width:640px){.items{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.comps .lst{font-size:13px;margin-top:8px;font-variant-numeric:tabular-nums}
+.comps .lst div{display:grid;grid-template-columns:72px 1fr auto;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.comps .lst div span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.comps .ss{color:var(--brand2);font-weight:650}
 .inp.check{border-color:var(--warn);box-shadow:0 0 0 2px color-mix(in srgb,var(--warn) 25%,transparent)}
 #prefillLinks a{font-weight:600;color:var(--brand2);text-decoration:none;border:1px solid var(--line);padding:8px 12px;border-radius:9px;background:var(--card)}
 @media (min-width:640px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.big{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -97,13 +105,15 @@ textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:
 
 <main>
   <div id="prefillNote" class="card" style="display:none;border-color:var(--warn)">
-    <b>Filled in from the listing.</b> The price, stamp duty and service charge are set for this property.
-    <b>End value (GDV) and rent are rough placeholders</b>, so enter your own figures, highlighted below.
+    <b>Filled in from the listing.</b> The asking price, stamp duty and service charge are set for this property, with your offer at 85% of asking.
+    <b>End value (130% of asking) and rent (£995) are defaults</b>, so check both against local comparables. They're highlighted below.
     <div class="btns" style="margin-top:8px" id="prefillLinks"></div>
   </div>
   <details open>
     <summary>1 · Purchase <span class="s" id="s_buy"></span></summary>
     <div class="grid">
+      <div class="f"><label>Asking price</label><div class="inp"><span>£</span><input data-k="ask" inputmode="decimal"></div></div>
+      <div class="f"><label>Offer (% of asking)</label><div class="inp"><input data-k="offerPct" inputmode="decimal"><span>%</span></div></div>
       <div class="f"><label>Purchase price</label><div class="inp"><span>£</span><input data-k="price" inputmode="decimal"></div></div>
       <div class="f"><label>Buyer type</label><div class="inp"><select data-k="sdltMode">
         <option value="add">Additional (+5%)</option>
@@ -122,6 +132,24 @@ textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:
     <div class="grid">
       <div class="f"><label>Refurb cost</label><div class="inp"><span>£</span><input data-k="refurb" inputmode="decimal"></div></div>
       <div class="f"><label>Contingency</label><div class="inp"><input data-k="contPct" inputmode="decimal"><span>%</span></div></div>
+      <label class="toggle"><input type="checkbox" data-k="itemise"> Itemise refurb costs</label>
+      <div class="items full" id="items">
+        <div class="f"><label>Kitchen</label><div class="inp"><span>£</span><input data-k="r_kitchen" inputmode="decimal"></div></div>
+        <div class="f"><label>Bathroom</label><div class="inp"><span>£</span><input data-k="r_bathroom" inputmode="decimal"></div></div>
+        <div class="f"><label>Heating / boiler</label><div class="inp"><span>£</span><input data-k="r_heating" inputmode="decimal"></div></div>
+        <div class="f"><label>Electrics / rewire</label><div class="inp"><span>£</span><input data-k="r_electrics" inputmode="decimal"></div></div>
+        <div class="f"><label>Windows</label><div class="inp"><span>£</span><input data-k="r_windows" inputmode="decimal"></div></div>
+        <div class="f"><label>Replastering</label><div class="inp"><span>£</span><input data-k="r_replaster" inputmode="decimal"></div></div>
+        <div class="f"><label>Flooring</label><div class="inp"><span>£</span><input data-k="r_flooring" inputmode="decimal"></div></div>
+        <div class="f"><label>Decorating</label><div class="inp"><span>£</span><input data-k="r_decorating" inputmode="decimal"></div></div>
+        <div class="f"><label>Lighting</label><div class="inp"><span>£</span><input data-k="r_lighting" inputmode="decimal"></div></div>
+        <div class="f"><label>External doors</label><div class="inp"><span>£</span><input data-k="r_extDoors" inputmode="decimal"></div></div>
+        <div class="f"><label>Outdoor space</label><div class="inp"><span>£</span><input data-k="r_outdoor" inputmode="decimal"></div></div>
+        <div class="f"><label>External decoration</label><div class="inp"><span>£</span><input data-k="r_extDec" inputmode="decimal"></div></div>
+        <div class="f"><label>Building works</label><div class="inp"><span>£</span><input data-k="r_building" inputmode="decimal"></div></div>
+        <div class="f"><label>Other / unallocated</label><div class="inp"><span>£</span><input data-k="r_other" inputmode="decimal"></div></div>
+        <div class="hint">The refurb cost above is the total of these items. Contingency is added on top.</div>
+      </div>
       <div class="f"><label>Months until refinance</label><div class="inp"><input data-k="months" inputmode="decimal"><span>mo</span></div></div>
       <div class="f full"><label>Holding costs / month (council tax, utilities, insurance while empty)</label><div class="inp"><span>£</span><input data-k="holdPm" inputmode="decimal"></div></div>
       <label class="toggle"><input type="checkbox" data-k="useBridge"> Bridging finance for the purchase</label>
@@ -138,6 +166,7 @@ textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:
     <div class="grid">
       <div class="f"><label>End value after refurb (GDV)</label><div class="inp"><span>£</span><input data-k="gdv" inputmode="decimal"></div></div>
       <div class="f"><label>Loan to value</label><div class="inp"><input data-k="ltv" inputmode="decimal"><span>%</span></div></div>
+      <div class="hint" id="h_gdv"></div>
       <div class="f"><label>Mortgage rate</label><div class="inp"><input data-k="rate" inputmode="decimal"><span>%</span></div></div>
       <div class="f"><label>Repayment type</label><div class="inp"><select data-k="repay">
         <option value="io">Interest only</option><option value="rep">Capital repayment</option></select></div></div>
@@ -152,6 +181,8 @@ textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:
       <div class="hint">Common lender tests: limited company 125% at 5.5%; higher-rate taxpayer in own name 145%. Check with your broker.</div>
     </div>
   </details>
+
+  <div class="card comps" id="compsCard" style="display:none"></div>
 
   <details open>
     <summary>4 · Rent &amp; running costs <span class="s" id="s_rent"></span></summary>
@@ -212,12 +243,13 @@ textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:
 
 <script>
 const DEFAULTS = {
-  price:95000, sdltMode:"add", sdltManual:0, legal:1500, survey:500, sourcing:0,
-  refurb:12000, contPct:10, months:5, holdPm:150,
+  ask:100000, offerPct:85, price:85000, sdltMode:"add", sdltManual:0, legal:1500, survey:500, sourcing:0,
+  refurb:18000, contPct:10, itemise:false,
+  r_kitchen:0, r_bathroom:0, r_heating:0, r_electrics:0, r_windows:0, r_replaster:0, r_flooring:0, r_decorating:0, r_lighting:0, r_extDoors:0, r_outdoor:0, r_extDec:0, r_building:0, r_other:0, months:3, holdPm:200,
   useBridge:false, bridgePct:75, bridgeRate:0.85, bridgeArr:2, bridgeExit:1, bridgeLegal:1500,
-  gdv:125000, ltv:75, rate:5.5, repay:"io", term:25, lenderFee:1995, feeAdded:true, broker:500, refiLegal:900,
+  gdv:130000, gdvAuto:true, gdvPct:130, ltv:75, rate:5.5, repay:"io", term:25, lenderFee:1995, feeAdded:true, broker:500, refiLegal:900,
   icr:125, stress:5.5, capIcr:true,
-  rent:775, mgmt:12, voids:4, maint:5, ins:20, service:100, other:10,
+  rent:995, mgmt:12, voids:4, maint:5, ins:20, service:100, other:10,
   targetLeft:0
 };
 let S = {...DEFAULTS};
@@ -300,6 +332,10 @@ function render(){
   $("h_sdlt").textContent = S.sdltMode==="manual" ? "" : `Stamp duty calculated: ${fmt(c.stamp)}`;
   document.querySelectorAll('[data-k="sdltManual"]').forEach(i=>{ i.disabled = S.sdltMode!=="manual"; if(S.sdltMode!=="manual") i.value = c.stamp.toLocaleString("en-GB"); });
   document.querySelectorAll(".bridge").forEach(e=>e.style.display = S.useBridge ? "" : "none");
+  $("items").classList.toggle("on", !!S.itemise);
+  const rf = document.querySelector('[data-k="refurb"]'); rf.disabled = !!S.itemise;
+  if(S.itemise && document.activeElement !== rf) rf.value = (+S.refurb).toLocaleString("en-GB");
+  renderComps();
 
   $("t_cashin").textContent = fmt(c.cashIn);
   $("t_out").textContent = fmt(c.cashOut);
@@ -312,6 +348,7 @@ function render(){
     ["Purchase price", fmt(c.price)], ["Stamp duty", fmt(c.stamp)],
     ["Legal, survey, sourcing", fmt(+S.legal + +S.survey + +S.sourcing)],
     ["Refurb inc. " + S.contPct + "% contingency", fmt(c.refurb)],
+    ...(S.itemise ? ITEM_KEYS.filter(k=>+S[k]>0).map(k=>["&nbsp;&nbsp;· " + ITEM_NAMES[k], fmt(+S[k])]) : []),
     ["Holding (" + S.months + " months)", fmt(c.holding)],
     S.useBridge && ["Bridging interest", fmt(c.bridgeInt)],
     S.useBridge && ["Bridging fees", fmt(c.bridgeFees)],
@@ -346,12 +383,66 @@ function render(){
   add(c.cf > 100 ? "good" : c.cf > 0 ? "warn" : "bad", `Cashflow ${fmt(c.cf)}/mo after a ${pct(c.pctCosts/S.rent*100)} allowance for management, voids and maintenance.`);
   add(c.uplift >= 0.25*c.totalCost ? "good" : c.uplift > 0 ? "warn" : "bad", `Value uplift ${fmt(c.uplift)} over total cost (${pct(c.uplift/c.totalCost*100)}). Many BRRR investors aim for 25%+ so a 75% LTV mortgage covers the whole cost.`);
   add(c.grossYieldPrice >= 8 ? "good" : c.grossYieldPrice >= 6 ? "warn" : "bad", `Gross yield ${pct(c.grossYieldPrice)} on purchase price, ${pct(c.grossYieldCost)} on total cost.`);
+  if(S.comps && S.comps.median){
+    const d = (S.gdv - S.comps.median) / S.comps.median * 100;
+    if(d > 10) add("warn", `Your end value (${fmt(+S.gdv)}) is ${d.toFixed(0)}% above the median of ${S.comps.n} nearby sales (${fmt(S.comps.median)}). Make sure the finished property would really sell at the top end.`);
+    else add("good", `Your end value (${fmt(+S.gdv)}) is ${d >= 0 ? d.toFixed(0) + "% above" : Math.abs(d).toFixed(0) + "% below"} the median of ${S.comps.n} nearby sales (${fmt(S.comps.median)}).`);
+  }
   if(+S.service > 0) add("warn", "Leasehold: check the lease length (lenders usually want 85+ years at refinance), ground rent terms and service charge history.");
   if(+S.months < 6) add("warn", "Many lenders won't refinance at the new value within 6 months of purchase. Check that a day-one remortgage lender is available.");
   $("flags").innerHTML = F.join("");
 
   const mo = maxOffer(S);
-  $("maxOffer").textContent = mo===null ? "Not achievable" : fmt(mo);
+  $("maxOffer").textContent = mo===null ? "Not achievable" : fmt(mo) + (+S.ask>0 ? ` (${Math.round(mo/S.ask*100)}% of asking)` : "");
+  $("h_gdv").innerHTML = S.gdvAuto
+    ? `End value is set to ${S.gdvPct}% of the asking price. Type your own figure to change it.`
+    : `End value is your own figure${+S.ask>0 ? " (" + Math.round(S.gdv/S.ask*100) + "% of asking)" : ""}. <a href="#" id="gdvReset" style="color:var(--brand2);font-weight:600">Reset to ${S.gdvPct}% of asking</a>`;
+}
+
+// ---- linked fields: asking price x offer % = purchase price; GDV defaults to 130% of asking
+const r500 = n => Math.round(n/500)*500;
+function linked(k){
+  if(k==="ask" || k==="offerPct"){ if(+S.ask>0) S.price = Math.round(S.ask*S.offerPct/100); }
+  if(k==="price" && +S.ask>0){ S.offerPct = Math.round(S.price/S.ask*1000)/10; }
+  if(k==="ask" && S.gdvAuto && +S.ask>0){ S.gdv = r500(S.ask*S.gdvPct/100); }
+  if(k==="gdv"){ S.gdvAuto = false; }
+}
+const ITEM_KEYS = ["r_kitchen", "r_bathroom", "r_heating", "r_electrics", "r_windows", "r_replaster", "r_flooring", "r_decorating", "r_lighting", "r_extDoors", "r_outdoor", "r_extDec", "r_building", "r_other"];
+const ITEM_NAMES = {"r_kitchen": "Kitchen", "r_bathroom": "Bathroom", "r_heating": "Heating / boiler", "r_electrics": "Electrics / rewire", "r_windows": "Windows", "r_replaster": "Replastering", "r_flooring": "Flooring", "r_decorating": "Decorating", "r_lighting": "Lighting", "r_extDoors": "External doors", "r_outdoor": "Outdoor space", "r_extDec": "External decoration", "r_building": "Building works", "r_other": "Other / unallocated"};
+function itemTotal(){ return ITEM_KEYS.reduce((t,k)=>t + (+S[k]||0), 0); }
+function itemise(k){
+  if(k==="itemise" && S.itemise && itemTotal()===0){ S.r_other = +S.refurb || 0; }   // keep the total the same to start with
+  if(S.itemise) S.refurb = itemTotal();
+}
+function normalise(d){
+  // deals saved before asking price existed: treat the purchase price as the asking price
+  const o = {...DEFAULTS, ...d};
+  if(d.ask == null){ o.ask = +d.price || DEFAULTS.ask; o.offerPct = 100; o.gdvAuto = false; }
+  return o;
+}
+function refresh(except){
+  document.querySelectorAll("[data-k]").forEach(el=>{
+    if(el===except || el.type==="checkbox" || el.tagName==="SELECT" || el.disabled) return;
+    el.value=(+S[el.dataset.k]).toLocaleString("en-GB",{maximumFractionDigits:2});
+  });
+}
+
+// ---- comparable sales (filled in from the Deal Finder dashboard)
+const TW = {F:"flats", T:"terraced houses", S:"semis", D:"detached houses", TSD:"houses"};
+function renderComps(){
+  const box = $("compsCard"), cp = S.comps;
+  if(!cp || !cp.median){ box.style.display = "none"; return; }
+  box.style.display = "block";
+  const mf = iso => new Date(iso + "T12:00:00").toLocaleDateString("en-GB",{month:"short",year:"numeric"});
+  box.innerHTML = `<h2>Sold nearby</h2>
+    <div class="big" style="margin:0 0 6px"><div class="tile"><div class="l">Median sold price</div><div class="v">${fmt(cp.median)}</div>
+      <div class="n">${cp.n} ${TW[cp.cls]||"homes"} within ${cp.radius} mi, last ${cp.yrs||3} yrs</div></div>
+      <div class="tile"><div class="l">Range</div><div class="v" style="font-size:17px">${fmt(cp.min)}–${fmt(cp.max)}</div>
+      <div class="n">Your end value: ${fmt(+S.gdv)}</div></div></div>
+    <div class="btns"><button class="p" id="useMedian">Use median as end value</button></div>
+    <div class="lst">${(cp.list||[]).map(([pr,d,a,di,ss]) => `<div><span>${mf(d)}</span><span class="${ss?'ss':''}">${String(a).replace(/</g,"&lt;")}</span><span>${fmt(pr)}</span></div>`).join("")}</div>
+    <p class="muted" style="margin:8px 0 0">HM Land Registry sold prices (bedrooms aren't recorded). Same-street sales are in green. Refurbished homes usually sell above the median.</p>`;
+  $("useMedian").onclick = () => { S.gdv = cp.median; S.gdvAuto = false; fill(); render(); persistDraft(); toast("End value set to the median"); };
 }
 
 // ---- inputs
@@ -362,6 +453,8 @@ function bind(){
       if(el.type==="checkbox") S[k]=el.checked;
       else if(el.tagName==="SELECT") S[k]=el.value;
       else { const v=parseFloat(String(el.value).replace(/[£,\s]/g,"")); S[k]=isNaN(v)?0:v; }
+      if(["ask","offerPct","price","gdv"].includes(k)){ linked(k); refresh(el); }
+      if(k==="itemise" || k.startsWith("r_")){ itemise(k); refresh(el); }
       render(); persistDraft();
     };
     el.addEventListener("input", set); el.addEventListener("change", set);
@@ -379,23 +472,27 @@ function fill(){
   $("dealName").value = S.name || "";
 }
 
+document.addEventListener("click", e=>{
+  if(e.target.id==="gdvReset"){ e.preventDefault(); S.gdvAuto=true; S.gdv=r500(S.ask*S.gdvPct/100); fill(); render(); persistDraft(); }
+});
+
 // ---- storage (this browser only)
 const LS = { get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } },
              set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } } };
 let deals = LS.get("brrr_deals", []);
-function persistDraft(){ LS.set("brrr_draft", S); }
+function persistDraft(){ LS.set("brrr_draft_v2", S); }
 function toast(t){ const e=$("toast"); e.textContent=t; e.classList.add("on"); setTimeout(()=>e.classList.remove("on"),1800); }
 
 function renderSaved(){
   if(!deals.length){ $("saved").innerHTML = '<p class="muted">No saved deals yet. Saved deals are kept in this browser.</p>'; return; }
-  $("saved").innerHTML = deals.map((d,i)=>{ const c=calc(d); return `<div class="it">
+  $("saved").innerHTML = deals.map((d,i)=>{ const c=calc(normalise(d)); return `<div class="it">
     <div><b>${(d.name||"Untitled deal").replace(/</g,"&lt;")}</b>
     <small>${fmt(+d.price)} · left in ${fmt(Math.max(0,c.left))} · ${fmt(c.cf)}/mo</small></div>
     <div class="a"><button data-open="${i}">Open</button><button data-del="${i}">✕</button></div></div>`; }).join("");
 }
 $("saved").addEventListener("click", e=>{
   const o=e.target.dataset.open, d=e.target.dataset.del;
-  if(o!==undefined){ S={...DEFAULTS,...deals[o]}; fill(); render(); persistDraft(); window.scrollTo({top:0,behavior:"smooth"}); toast("Deal loaded"); }
+  if(o!==undefined){ S=normalise(deals[o]); fill(); render(); persistDraft(); window.scrollTo({top:0,behavior:"smooth"}); toast("Deal loaded"); }
   if(d!==undefined){ if(e.target.dataset.sure){ deals.splice(d,1); LS.set("brrr_deals",deals); renderSaved(); toast("Deleted"); }
                      else { e.target.dataset.sure=1; e.target.textContent="Delete?"; } }
 });
@@ -413,6 +510,7 @@ $("dealName").addEventListener("input", e=>{ S.name=e.target.value; persistDraft
 function summary(){
   const c=calc(S);
   return [`${S.name||"BRRR deal"}`,
+    `Asking ${fmt(+S.ask)} · offer ${S.offerPct}% = ${fmt(c.price)}`,
     `Purchase ${fmt(c.price)} + SDLT ${fmt(c.stamp)} + refurb ${fmt(c.refurb)} → total cost ${fmt(c.totalCost)}`,
     `GDV ${fmt(+S.gdv)} · mortgage ${fmt(c.mortgage)} @ ${S.rate}%`,
     `Cash in ${fmt(c.cashIn)} · cash out ${fmt(c.cashOut)} · money left in ${fmt(Math.max(0,c.left))}`,
@@ -435,7 +533,10 @@ let PRE = null;
 try{ if(location.hash.startsWith("#prefill=")) PRE = JSON.parse(decodeURIComponent(location.hash.slice(9))); }catch(e){ PRE = null; }
 if(PRE){
   const {listingUrl, fromDashboard, ...vals} = PRE;
+  if(vals.ask == null && vals.price != null){ vals.ask = vals.price; }   // links from older dashboards
+  delete vals.price; delete vals.gdv;
   S = {...DEFAULTS, ...vals};
+  linked("ask");
   $("prefillNote").style.display = "block";
   const links = [];
   if(listingUrl && /^https:\/\//.test(listingUrl)) links.push(`<a href="${listingUrl.replace(/"/g,"&quot;")}" target="_blank" rel="noopener">View listing ↗</a>`);
@@ -444,7 +545,8 @@ if(PRE){
   ["gdv","rent"].forEach(k => { const el = document.querySelector(`[data-k="${k}"]`); const box = el && el.closest(".inp");
     if(box){ box.classList.add("check"); el.addEventListener("input", () => box.classList.remove("check"), {once:true}); } });
 }else{
-  S = {...DEFAULTS, ...LS.get("brrr_draft", {})};
+  const draft = LS.get("brrr_draft_v2", null);
+  S = draft ? normalise(draft) : {...DEFAULTS};
 }
 bind(); fill(); render(); renderSaved();
 </script>
