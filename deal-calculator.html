@@ -106,7 +106,7 @@ textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:
 <main>
   <div id="prefillNote" class="card" style="display:none;border-color:var(--warn)">
     <b>Filled in from the listing.</b> The asking price, stamp duty and service charge are set for this property, with your offer at 85% of asking.
-    <b>End value (130% of asking) and rent (£995) are defaults</b>, so check both against local comparables. They're highlighted below.
+    <span id="prefillRentNote"><b>End value (130% of asking) and rent (£995) are defaults</b>, so check both against local comparables. They're highlighted below.</span>
     <div class="btns" style="margin-top:8px" id="prefillLinks"></div>
   </div>
   <details open>
@@ -183,6 +183,8 @@ textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:
   </details>
 
   <div class="card comps" id="compsCard" style="display:none"></div>
+
+  <div class="card comps" id="rentsCard" style="display:none"></div>
 
   <details open>
     <summary>4 · Rent &amp; running costs <span class="s" id="s_rent"></span></summary>
@@ -335,7 +337,7 @@ function render(){
   $("items").classList.toggle("on", !!S.itemise);
   const rf = document.querySelector('[data-k="refurb"]'); rf.disabled = !!S.itemise;
   if(S.itemise && document.activeElement !== rf) rf.value = (+S.refurb).toLocaleString("en-GB");
-  renderComps();
+  renderComps(); renderRents();
 
   $("t_cashin").textContent = fmt(c.cashIn);
   $("t_out").textContent = fmt(c.cashOut);
@@ -387,6 +389,11 @@ function render(){
     const d = (S.gdv - S.comps.median) / S.comps.median * 100;
     if(d > 10) add("warn", `Your end value (${fmt(+S.gdv)}) is ${d.toFixed(0)}% above the median of ${S.comps.n} nearby sales (${fmt(S.comps.median)}). Make sure the finished property would really sell at the top end.`);
     else add("good", `Your end value (${fmt(+S.gdv)}) is ${d >= 0 ? d.toFixed(0) + "% above" : Math.abs(d).toFixed(0) + "% below"} the median of ${S.comps.n} nearby sales (${fmt(S.comps.median)}).`);
+  }
+  if(S.rents && S.rents.median){
+    const d = (S.rent - S.rents.median) / S.rents.median * 100;
+    if(d > 10) add("warn", `Your rent (${fmt(+S.rent)}) is ${d.toFixed(0)}% above the median of ${S.rents.n} nearby ${S.rents.beds}-bed ${S.rents.kind} (${fmt(S.rents.median)} pcm).`);
+    else add("good", `Your rent (${fmt(+S.rent)}) is ${d >= 0 ? d.toFixed(0) + "% above" : Math.abs(d).toFixed(0) + "% below"} the median of ${S.rents.n} nearby ${S.rents.beds}-bed ${S.rents.kind} (${fmt(S.rents.median)} pcm).`);
   }
   if(+S.service > 0) add("warn", "Leasehold: check the lease length (lenders usually want 85+ years at refinance), ground rent terms and service charge history.");
   if(+S.months < 6) add("warn", "Many lenders won't refinance at the new value within 6 months of purchase. Check that a day-one remortgage lender is available.");
@@ -443,6 +450,23 @@ function renderComps(){
     <div class="lst">${(cp.list||[]).map(([pr,d,a,di,ss]) => `<div><span>${mf(d)}</span><span class="${ss?'ss':''}">${String(a).replace(/</g,"&lt;")}</span><span>${fmt(pr)}</span></div>`).join("")}</div>
     <p class="muted" style="margin:8px 0 0">HM Land Registry sold prices (bedrooms aren't recorded). Same-street sales are in green. Refurbished homes usually sell above the median.</p>`;
   $("useMedian").onclick = () => { S.gdv = cp.median; S.gdvAuto = false; fill(); render(); persistDraft(); toast("End value set to the median"); };
+}
+
+// ---- rents nearby (filled in from the Deal Finder dashboard)
+function renderRents(){
+  const box = $("rentsCard"), rt = S.rents;
+  if(!rt || !rt.median){ box.style.display = "none"; return; }
+  box.style.display = "block";
+  const y = rt.median*12/(+S.price||1)*100;
+  box.innerHTML = `<h2>Rents nearby</h2>
+    <div class="big" style="margin:0 0 6px"><div class="tile"><div class="l">Median rent</div><div class="v">${fmt(rt.median)}<small style="font-size:13px;font-weight:500"> pcm</small></div>
+      <div class="n">${rt.n} ${rt.beds}-bed ${rt.kind} within ${rt.radius} mi, last 12 months</div></div>
+      <div class="tile"><div class="l">Range</div><div class="v" style="font-size:17px">${fmt(rt.min)}–${fmt(rt.max)}</div>
+      <div class="n">Gross yield at median rent: ${y.toFixed(1)}% on your price</div></div></div>
+    <div class="btns"><button class="p" id="useRent">Use median rent</button></div>
+    <div class="lst">${(rt.list||[]).map(([r,a,d,la]) => `<div><span>${fmt(r)}</span><span>${String(a).replace(/</g,"&lt;")}${la ? " (let agreed)" : ""}</span><span>${d} mi</span></div>`).join("")}</div>
+    <p class="muted" style="margin:8px 0 0">Asking rents from Rightmove and OnTheMarket, including let-agreed properties. Actual achieved rents can be a little lower.</p>`;
+  $("useRent").onclick = () => { S.rent = rt.median; fill(); render(); persistDraft(); toast("Rent set to the median"); };
 }
 
 // ---- inputs
@@ -542,6 +566,9 @@ if(PRE){
   if(listingUrl && /^https:\/\//.test(listingUrl)) links.push(`<a href="${listingUrl.replace(/"/g,"&quot;")}" target="_blank" rel="noopener">View listing ↗</a>`);
   if(fromDashboard) links.push(`<a href="dashboard.html">← Back to listings</a>`);
   $("prefillLinks").innerHTML = links.join("");
+  if(vals.rents && vals.rents.median){
+    $("prefillRentNote").innerHTML = `<b>Rent is set to the median of ${vals.rents.n} nearby ${vals.rents.beds}-bed ${vals.rents.kind} (${fmt(vals.rents.median)} pcm).</b> End value is 130% of asking. Check both, highlighted below.`;
+  }
   ["gdv","rent"].forEach(k => { const el = document.querySelector(`[data-k="${k}"]`); const box = el && el.closest(".inp");
     if(box){ box.classList.add("check"); el.addEventListener("input", () => box.classList.remove("check"), {once:true}); } });
 }else{
